@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JobStatus {
+  uploaded
+  pending_confirmation
+  processing
+  waiting_user_input
+  reprocessing
+  completed
+  failed
+  queued_overload
+}
+
+enum TargetLanguage {
+  hebrew
+  english
+  french
+}
+
+enum TranslationStyle {
+  accurate
+  fluent
+}
+
+enum ProcessingMode {
+  first_page
+  full
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  fileName  String
+  fileSize  Int
+  filePath  String
+  mimeType  String
+  pageCount Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobs      Job[]
+
+  @@map("documents")
+}
+
+model Job {
+  id             String           @id @default(cuid())
+  documentId     String
+  document       Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  status         JobStatus        @default(uploaded)
+  targetLanguage TargetLanguage
+  style          TranslationStyle
+  mode           ProcessingMode
+  errorMessage   String?
+  pages          JobPage[]
+  corrections    Correction[]
+  debugLogs      DebugLog[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("jobs")
+}
+
+model JobPage {
+  id             String        @id @default(cuid())
+  jobId          String
+  job            Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  pageNumber     Int
+  imagePath      String?
+  transcription  String?
+  translation    String?
+  confidence     String?
+  uncertainTerms Json?
+  status         String        @default("pending")
+  currentVersion Int           @default(1)
+  versions       PageVersion[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([jobId, pageNumber])
+  @@map("job_pages")
+}
+
+model PageVersion {
+  id             String   @id @default(cuid())
+  pageId         String
+  page           JobPage  @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  version        Int
+  transcription  String?
+  translation    String?
+  confidence     String?
+  uncertainTerms Json?
+  corrections    Json?
+  createdAt      DateTime @default(now())
+
+  @@unique([pageId, version])
+  @@map("page_versions")
+}
+
+model Correction {
+  id               String   @id @default(cuid())
+  jobId            String
+  job              Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  termId           String
+  pageNumber       Int
+  originalSnippet  String
+  userCorrection   String
+  createdAt        DateTime @default(now())
+
+  @@map("corrections")
+}
+
+model DebugLog {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  pageId    String?
+  stage     String
+  request   Json?
+  response  Json?
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@map("debug_logs")
+}
