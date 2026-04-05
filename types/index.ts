@@ -67,6 +67,7 @@ export interface JobRecord {
   updatedAt: string;
   document?: DocumentRecord;
   pages?: JobPageRecord[];
+  corrections?: CorrectionRecord[];
 }
 
 export interface CorrectionRecord {
