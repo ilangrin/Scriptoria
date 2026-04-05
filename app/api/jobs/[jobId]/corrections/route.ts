@@ -95,8 +95,8 @@ export async function POST(
             jobId,
             pageId: page.id,
             stage: 'reprocess_page',
-            request: rawRequest,
-            response: rawResponse,
+            request: JSON.parse(JSON.stringify(rawRequest)),
+            response: JSON.parse(JSON.stringify(rawResponse)),
           },
         });
 
