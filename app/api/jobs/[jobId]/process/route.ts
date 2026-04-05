@@ -96,6 +96,8 @@ export async function POST(
 
         const uncertainTerms = result.uncertain_terms as unknown as UncertainTerm[];
 
+        const uncertainTermsJson = JSON.parse(JSON.stringify(uncertainTerms));
+
         // Save page version 1
         await prisma.pageVersion.upsert({
           where: { pageId_version: { pageId: jobPage.id, version: 1 } },
@@ -105,13 +107,13 @@ export async function POST(
             transcription: result.transcription,
             translation: result.translation,
             confidence: result.confidence,
-            uncertainTerms: uncertainTerms as unknown as never,
+            uncertainTerms: uncertainTermsJson,
           },
           update: {
             transcription: result.transcription,
             translation: result.translation,
             confidence: result.confidence,
-            uncertainTerms: uncertainTerms as unknown as never,
+            uncertainTerms: uncertainTermsJson,
           },
         });
 
@@ -122,7 +124,7 @@ export async function POST(
             transcription: result.transcription,
             translation: result.translation,
             confidence: result.confidence,
-            uncertainTerms: uncertainTerms as unknown as never,
+            uncertainTerms: uncertainTermsJson,
             status: uncertainTerms.length > 0 ? 'uncertain' : 'completed',
             currentVersion: 1,
           },

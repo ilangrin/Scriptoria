@@ -75,7 +75,7 @@ function ElephantMouseAnimation() {
         ))}
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes mouseFloat {
           0%, 100% { transform: translateX(0px) translateY(0px); }
           25% { transform: translateX(20px) translateY(-4px); }

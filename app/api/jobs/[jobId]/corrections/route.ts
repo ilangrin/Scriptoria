@@ -102,6 +102,10 @@ export async function POST(
 
         const newVersion = page.currentVersion + 1;
 
+        const newUncertainTerms = result.uncertain_terms as unknown as UncertainTerm[];
+        const newUncertainTermsJson = JSON.parse(JSON.stringify(newUncertainTerms));
+        const correctionsJson = JSON.parse(JSON.stringify(pageCorrections ?? []));
+
         // Save new version
         await prisma.pageVersion.create({
           data: {
@@ -110,12 +114,10 @@ export async function POST(
             transcription: result.transcription,
             translation: result.translation,
             confidence: result.confidence,
-            uncertainTerms: result.uncertain_terms as unknown as never,
-            corrections: (pageCorrections ?? []) as unknown as never,
+            uncertainTerms: newUncertainTermsJson,
+            corrections: correctionsJson,
           },
         });
-
-        const newUncertainTerms = result.uncertain_terms as unknown as UncertainTerm[];
 
         // Update page
         await prisma.jobPage.update({
@@ -124,7 +126,7 @@ export async function POST(
             transcription: result.transcription,
             translation: result.translation,
             confidence: result.confidence,
-            uncertainTerms: newUncertainTerms as unknown as never,
+            uncertainTerms: newUncertainTermsJson,
             status: newUncertainTerms.length > 0 ? 'uncertain' : 'completed',
             currentVersion: newVersion,
           },

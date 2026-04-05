@@ -12,10 +12,6 @@ const nextConfig = {
     }
     return config;
   },
-  // Allow large file uploads
-  api: {
-    bodyParser: false,
-  },
 };
 
 module.exports = nextConfig;
