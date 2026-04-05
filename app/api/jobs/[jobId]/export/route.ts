@@ -78,7 +78,7 @@ export async function POST(
     const baseName = job.document.fileName.replace(/\.[^.]+$/, '');
     const exportFileName = `${baseName}_translation.${fileExtension}`;
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         'Content-Type': contentType,
